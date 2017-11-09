@@ -1,22 +1,27 @@
-package marashoft.growthgoals;
+package marashoft.growthgoals.fragments.daily;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.widget.DrawerLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import marashoft.growthgoals.fragments.daily.OneDayFragment;
+
 public class PagerAdpater extends FragmentStatePagerAdapter {
 
     private List<Date> nItems;
+    private DrawerLayout menu;
 
- 
- public PagerAdpater(FragmentManager fm,List<Date> nItems) {
+
+
+    public PagerAdpater(FragmentManager fm,List<Date> nItems,DrawerLayout menu) {
   super(fm);
    this.nItems=nItems;
+        this.menu=menu;
  }
  
  /*
@@ -26,7 +31,7 @@ public class PagerAdpater extends FragmentStatePagerAdapter {
   */
  @Override
  public Fragment getItem(int position) {
-     return OneDayFragment.newInstance(nItems.get(position));
+     return OneDayFragment.newInstance(nItems.get(position),menu);
  }
  
  /*

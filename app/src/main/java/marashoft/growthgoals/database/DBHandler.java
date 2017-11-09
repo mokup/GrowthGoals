@@ -24,8 +24,10 @@ public class DBHandler extends SQLiteOpenHelper {
     // Contacts table name
 
     public DBHandler(Context context) {
+        //super(context,  DATABASE_NAME, null, DATABASE_VERSION);
         super(context,  Environment.getExternalStorageDirectory()
                 + File.separator+DATABASE_NAME, null, DATABASE_VERSION);
+
         Log.d("DATABASE",context.getDatabasePath(DATABASE_NAME).getAbsolutePath());
     }
 

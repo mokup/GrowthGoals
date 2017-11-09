@@ -80,4 +80,16 @@ public class Goals {
         cursor.close();
         return data;
     }
+
+    public static boolean delete(DBHandler myhelper, int id) {
+        SQLiteDatabase db = myhelper.getWritableDatabase();
+
+
+
+        Log.d("DATABASE","delete where id="+id);
+
+        long esito = db.delete(Goal.getTableName(),  "_id=?", new String[]{id + ""});
+        Log.d("DATABASE","esito="+esito);
+        return esito>0;
+    }
 }

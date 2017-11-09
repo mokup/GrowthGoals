@@ -1,10 +1,7 @@
-package marashoft.growthgoals;
+package marashoft.growthgoals.fragments.daily;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,23 +12,20 @@ import org.joda.time.LocalDate;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
+import marashoft.growthgoals.R;
 import marashoft.growthgoals.database.DBHandler;
 import marashoft.growthgoals.database.query.Goals;
+import marashoft.growthgoals.fragments.AbstractFragment;
 
 /**
  * Created by Alessandro on 21/10/2017.
  */
 
-public class DailyFragment extends Fragment {
+public class DailyFragment extends AbstractFragment {
 
 
     private ViewPager viewPager;
@@ -50,13 +44,20 @@ public class DailyFragment extends Fragment {
 
         DBHandler db=new DBHandler(this.getContext());
         String minData = Goals.getAllDays(db);
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy/MM/dd");
         Date md=null;
-        try {
-            md=sdf.parse(minData);
+        if(minData!=null){
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy/MM/dd");
+
+            try {
+                md=sdf.parse(minData);
+                listDate.add(md);
+            } catch (ParseException e) {
+                Log.e("ERROR","ERRORE nel parsing della data"+minData);
+            }
+        }
+        else{
+            md=LocalDate.now().toDate();
             listDate.add(md);
-        } catch (ParseException e) {
-            Log.e("ERROR","ERRORE nel parsing della data"+minData);
         }
         LocalDate cd=LocalDate.fromDateFields(md);
         LocalDate oggi=LocalDate.now();
@@ -67,7 +68,7 @@ public class DailyFragment extends Fragment {
         }
 
 
-        viewPager.setAdapter(new PagerAdpater(getChildFragmentManager(),listDate));
+        viewPager.setAdapter(new PagerAdpater(getChildFragmentManager(),listDate,getMenu()));
         if(!listDate.isEmpty()) viewPager.setCurrentItem(listDate.size()-1);
 //        tabLayout.setupWithViewPager(viewPager);
 

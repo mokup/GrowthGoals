@@ -1,14 +1,14 @@
-package marashoft.growthgoals;
+package marashoft.growthgoals.fragments.daily;
 
 import android.database.Cursor;
 import android.os.Bundle;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,12 +16,13 @@ import android.widget.Toast;
 
 import org.joda.time.LocalDate;
 
+import marashoft.growthgoals.R;
 import marashoft.growthgoals.database.DBHandler;
 import marashoft.growthgoals.database.adapter.ChangeListAdapter;
-import marashoft.growthgoals.database.adapter.GoalsAdapter;
 import marashoft.growthgoals.database.adapter.TextCheckDataModel;
 import marashoft.growthgoals.database.adapter.TextCheckViewHolder;
 import marashoft.growthgoals.database.query.Goals;
+import marashoft.growthgoals.fragments.AbstractFragment;
 
 
 import java.text.SimpleDateFormat;
@@ -30,7 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class OneDayFragment extends Fragment {
+public class OneDayFragment extends AbstractFragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -40,6 +41,7 @@ public class OneDayFragment extends Fragment {
     private Date dateThis;
     final SimpleDateFormat sdfDB=new SimpleDateFormat("yyyy/MM/dd");
     private View viewFather;
+    private DrawerLayout drawer;
 //    private OnListFragmentInteractionListener mListener;
 
     /**
@@ -51,8 +53,9 @@ public class OneDayFragment extends Fragment {
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static OneDayFragment newInstance(Date data) {
+    public static OneDayFragment newInstance(Date data,DrawerLayout layout) {
         OneDayFragment fragment = new OneDayFragment();
+        fragment.setMenu(layout);
         Bundle args = new Bundle();
         args.putSerializable("data",data);
         fragment.setArguments(args);
@@ -72,6 +75,7 @@ public class OneDayFragment extends Fragment {
         SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
 
         final Date date = (Date) getArguments().getSerializable("data");
+        final DrawerLayout drLayout= (DrawerLayout) getArguments().getSerializable("drawerLayout");
         dateThis=date;
         tw.setText(sdf.format(date));
 
@@ -101,9 +105,15 @@ public class OneDayFragment extends Fragment {
         final GoalsAdapter gaDone=new GoalsAdapter(date,cla,listDone,listToDo,getContext(),R.id.listDailyGoalArchived);
         lwDone.setAdapter(gaDone);
 
+        ImageButton dailyButton=(ImageButton)view.findViewById(R.id.imageDailyButton);
+        dailyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                openCloseMenu();
 
+            }
+        } );
 
-        FloatingActionButton addGoal=(FloatingActionButton)view.findViewById(R.id.floatingAddDailyGoal);
+        ImageButton addGoal=(ImageButton)view.findViewById(R.id.imageSaveButton);
         addGoal.setVisibility(isToday(date)?View.VISIBLE:View.GONE);
         addGoal.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -121,7 +131,7 @@ public class OneDayFragment extends Fragment {
                 for(int i=0;i<n;i++){
                     TextCheckViewHolder item = (TextCheckViewHolder)lwToDo.getChildAt(i).getTag();
                     String goal = item.getTextView().getText().toString();
-                    if(goal==null || goal.trim().equals("")) return ;
+                    if(goal==null || goal.trim().equals("")) continue ;
                     String msg=item.getId()==0?"inserted":"updated";
                     if(Goals.insertDailyGoal(db, item.getId(),goal,sdfDB.format(date),item.getCheckBox().isChecked())){
                         Toast.makeText(lwToDo.getContext(),"Succesfully "+msg+" goal",Toast.LENGTH_SHORT).show();
@@ -172,6 +182,14 @@ public class OneDayFragment extends Fragment {
         ListView listView = (ListView)viewFather.findViewById(id);
 
         listView.setAdapter(adp);
+
+        int n=adp.getCount();
+
+        View fv=(View)listView.getParent();
+
+        if(fv.getVisibility()==View.GONE && n>0) fv.setVisibility(View.VISIBLE);
+        else if(fv.getVisibility()==View.VISIBLE && n==0) fv.setVisibility(View.GONE);
+
         adp.notifyDataSetChanged();
     }
 

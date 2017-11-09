@@ -17,6 +17,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main {
+            res.srcDirs =
+                    [
+                            'src/main/res/layouts/activities',
+                            'src/main/res/layouts/fragments',
+                            'src/main/res/layouts/fragments/daily',
+                            'src/main/res/layouts/fragments/weekly',
+                            'src/main/res/layouts/fragments/monthly',
+                            'src/main/res/layouts/fragments/yearly',
+                            'src/main/res/layouts/fragments/custom',
+                            'src/main/res/layouts/other',
+                            'src/main/res/layouts',
+                            'src/main/res'
+                    ]
+        }
+    }
+
 
 }
 
@@ -36,3 +54,4 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
+

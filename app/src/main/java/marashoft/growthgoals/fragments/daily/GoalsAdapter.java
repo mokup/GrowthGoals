@@ -1,8 +1,10 @@
-package marashoft.growthgoals.database.adapter;
+package marashoft.growthgoals.fragments.daily;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +13,10 @@ import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.joda.time.LocalDate;
 
@@ -22,6 +26,9 @@ import java.util.Locale;
 
 import marashoft.growthgoals.R;
 import marashoft.growthgoals.database.DBHandler;
+import marashoft.growthgoals.database.adapter.ChangeListAdapter;
+import marashoft.growthgoals.database.adapter.TextCheckDataModel;
+import marashoft.growthgoals.database.adapter.TextCheckViewHolder;
 import marashoft.growthgoals.database.query.Goals;
 
 /**
@@ -67,14 +74,31 @@ public class GoalsAdapter extends ArrayAdapter {
         CheckBox checkBox ;
         EditText textView ;
 
-
+        ImageButton ibutton;
         if (convertView == null) {
 
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.daily_goals_item, parent, false);
             textView = (EditText) convertView.findViewById(R.id.txtNameGoal);
 
+
             checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
-            convertView.setTag(new TextCheckViewHolder(dataModel.getId(),textView,checkBox));
+
+             ibutton=(ImageButton)convertView.findViewById(R.id.imageButton);
+            ibutton.setOnClickListener( new View.OnClickListener() {
+                public void onClick(View v) {
+                    ImageButton cb = (ImageButton) v ;
+                    TextCheckDataModel planet = (TextCheckDataModel) cb.getTag();
+                    if(planet.getId()!=0){
+                        DBHandler db=new DBHandler(mContext);
+                        AlertDialog diaBox = AskOption(db,planet,dataSet1,ca);
+                        diaBox.show();
+
+                    }
+                }
+            } );
+
+
+
 
             checkBox.setOnClickListener( new View.OnClickListener() {
                 public void onClick(View v) {
@@ -101,15 +125,18 @@ public class GoalsAdapter extends ArrayAdapter {
                 }
             });
 
+            convertView.setTag(new TextCheckViewHolder(dataModel.getId(),textView,checkBox,ibutton));
 
         } else {
             // Because we use a ViewHolder, we avoid having to call findViewById().
             TextCheckViewHolder viewHolder = (TextCheckViewHolder) convertView.getTag();
             checkBox = viewHolder.getCheckBox() ;
             textView = viewHolder.getTextView() ;
+            ibutton = viewHolder.getImageButton();
         }
 
         checkBox.setTag( dataModel );
+        ibutton.setTag(dataModel);
 
         // Display planet data
         checkBox.setChecked( dataModel.isChecked() );
@@ -136,6 +163,9 @@ public class GoalsAdapter extends ArrayAdapter {
         }
 
 
+        ibutton.setVisibility(isToday(date) && parent.getId()==R.id.listDailyGoal?View.VISIBLE:View.GONE);
+
+
 
 
         return convertView;
@@ -146,6 +176,43 @@ public class GoalsAdapter extends ArrayAdapter {
         LocalDate dateToday=LocalDate.now();
         LocalDate dateFromApp=LocalDate.fromDateFields(dateApp);
         return dateToday.equals(dateFromApp);
+    }
+
+    private AlertDialog AskOption(final DBHandler db,final TextCheckDataModel model,final List dataset1,final ChangeListAdapter ca)
+    {
+        AlertDialog myQuittingDialogBox =new AlertDialog.Builder(this.getContext())
+                //set message, title, and icon
+                .setTitle("Delete")
+                .setMessage("Do you want to Delete")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if(Goals.delete(db,model.getId())) {
+
+                            dataSet1.remove(model);
+                            dataset1.add(new TextCheckDataModel(0,"",false));
+
+                            if (ca != null) {
+
+                                ca.refresh();
+                            }
+                        }
+                    }
+
+                })
+
+
+
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
+
     }
 
 }

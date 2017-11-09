@@ -2,15 +2,13 @@ package marashoft.growthgoals.database.adapter;
 
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import marashoft.growthgoals.OneDayFragment;
+import marashoft.growthgoals.fragments.daily.GoalsAdapter;
+import marashoft.growthgoals.fragments.daily.OneDayFragment;
 
 /**
  * Created by Alessandro on 01/11/2017.
@@ -77,7 +75,7 @@ public class ChangeListAdapter  {
         for (AdapterView a:
              dataViews) {
 
-            ((OneDayFragment)fragment).refreshView((GoalsAdapter) a.getAdapter(),a.getView());
+            if(fragment instanceof  OneDayFragment) ((OneDayFragment)fragment).refreshView((GoalsAdapter) a.getAdapter(),a.getView());
         }
 
         if(fragment instanceof  OneDayFragment){
