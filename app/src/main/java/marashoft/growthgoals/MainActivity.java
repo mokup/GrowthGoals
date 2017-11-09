@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-       displayFragment(id);
+        displayFragment(id);
 
 
         return true;
