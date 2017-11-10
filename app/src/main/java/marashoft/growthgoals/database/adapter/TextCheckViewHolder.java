@@ -9,16 +9,16 @@ import android.widget.ImageButton;
  */
 
 public class TextCheckViewHolder {
-    private  ImageButton imageButton;
+
     private  int id;
     private CheckBox checkBox ;
     private EditText textView ;
     public TextCheckViewHolder() {}
-    public TextCheckViewHolder(int id, EditText textView, CheckBox checkBox, ImageButton imageButton ) {
+    public TextCheckViewHolder(int id, EditText textView, CheckBox checkBox ) {
         this.checkBox = checkBox ;
         this.textView = textView ;
         this.id=id;
-        this.setImageButton(imageButton);
+
     }
     public CheckBox getCheckBox() {
         return checkBox;
@@ -41,11 +41,4 @@ public class TextCheckViewHolder {
         this.id = id;
     }
 
-    public ImageButton getImageButton() {
-        return imageButton;
-    }
-
-    public void setImageButton(ImageButton imageButton) {
-        this.imageButton = imageButton;
-    }
 }

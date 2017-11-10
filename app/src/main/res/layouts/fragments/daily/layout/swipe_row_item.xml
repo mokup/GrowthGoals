@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorAccent"
+    android:orientation="horizontal"
+
+    android:visibility="visible"
+ >
+
+    <ImageButton
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:gravity="left|center_vertical"
+        android:text="Delete"
+
+        android:textColor="@android:color/white"
+
+        app:srcCompat="@android:drawable/ic_menu_delete" />
+
+
+    <ImageButton
+        android:id="@+id/undo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+
+        android:layout_gravity="right|center_vertical"
+        android:layout_weight="1"
+
+        android:background="@android:color/transparent"
+        android:gravity="right|center_vertical"
+        android:text="Undo"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+
+</LinearLayout>

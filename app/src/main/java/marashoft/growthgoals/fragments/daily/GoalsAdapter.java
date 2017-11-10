@@ -83,19 +83,19 @@ public class GoalsAdapter extends ArrayAdapter {
 
             checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
 
-             ibutton=(ImageButton)convertView.findViewById(R.id.imageButton);
-            ibutton.setOnClickListener( new View.OnClickListener() {
-                public void onClick(View v) {
-                    ImageButton cb = (ImageButton) v ;
-                    TextCheckDataModel planet = (TextCheckDataModel) cb.getTag();
-                    if(planet.getId()!=0){
-                        DBHandler db=new DBHandler(mContext);
-                        AlertDialog diaBox = AskOption(db,planet,dataSet1,ca);
-                        diaBox.show();
-
-                    }
-                }
-            } );
+//             ibutton=(ImageButton)convertView.findViewById(R.id.imageButton);
+//            ibutton.setOnClickListener( new View.OnClickListener() {
+//                public void onClick(View v) {
+//                    ImageButton cb = (ImageButton) v ;
+//                    TextCheckDataModel planet = (TextCheckDataModel) cb.getTag();
+//                    if(planet.getId()!=0){
+//                        DBHandler db=new DBHandler(mContext);
+//                        AlertDialog diaBox = AskOption(db,planet,dataSet1,ca);
+//                        diaBox.show();
+//
+//                    }
+//                }
+//            } );
 
 
 
@@ -125,18 +125,18 @@ public class GoalsAdapter extends ArrayAdapter {
                 }
             });
 
-            convertView.setTag(new TextCheckViewHolder(dataModel.getId(),textView,checkBox,ibutton));
+            convertView.setTag(new TextCheckViewHolder(dataModel.getId(),textView,checkBox));
 
         } else {
             // Because we use a ViewHolder, we avoid having to call findViewById().
             TextCheckViewHolder viewHolder = (TextCheckViewHolder) convertView.getTag();
             checkBox = viewHolder.getCheckBox() ;
             textView = viewHolder.getTextView() ;
-            ibutton = viewHolder.getImageButton();
+
         }
 
         checkBox.setTag( dataModel );
-        ibutton.setTag(dataModel);
+
 
         // Display planet data
         checkBox.setChecked( dataModel.isChecked() );
@@ -163,7 +163,6 @@ public class GoalsAdapter extends ArrayAdapter {
         }
 
 
-        ibutton.setVisibility(isToday(date) && parent.getId()==R.id.listDailyGoal?View.VISIBLE:View.GONE);
 
 
 

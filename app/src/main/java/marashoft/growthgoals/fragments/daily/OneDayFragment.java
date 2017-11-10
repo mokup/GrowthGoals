@@ -1,18 +1,29 @@
 package marashoft.growthgoals.fragments.daily;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import org.joda.time.LocalDate;
 
@@ -88,22 +99,31 @@ public class OneDayFragment extends AbstractFragment {
         calculateData(db, listToDo, listDone);
 
         LinearLayout ll = (LinearLayout)view.findViewById(R.id.linearLayout);
-        ListView lwToDo=(ListView)view.findViewById(R.id.listDailyGoal);
+        RecyclerView lwToDo=(RecyclerView)view.findViewById(R.id.listDailyGoal);
+
+        lwToDo.setLayoutManager(new LinearLayoutManager(this.getContext()));
+
+
+
         TextView emptyToDO = (TextView)view.findViewById(R.id.emptyDailyToDo);
-        lwToDo.setEmptyView(emptyToDO);
+        if(listToDo.isEmpty()){
+            emptyToDO.setVisibility(View.VISIBLE);
+            lwToDo.setVisibility(View.GONE);
+        }
+        else{
+            emptyToDO.setVisibility(View.GONE);
+            lwToDo.setVisibility(View.VISIBLE);
+        }
+//        lwToDo.setEmptyView(emptyToDO);
+
+
 
         LinearLayout llArchived = (LinearLayout)view.findViewById(R.id.linearLayoutArchived);
         ListView lwDone=(ListView)view.findViewById(R.id.listDailyGoalArchived);
         TextView emptyDone = (TextView)view.findViewById(R.id.emptyDailyDone);
         lwDone.setEmptyView(emptyDone);
 
-        ChangeListAdapter cla=new ChangeListAdapter(this);
 
-        final GoalsAdapter gaToDo=new GoalsAdapter(date,cla,listToDo,listDone,getContext(),R.id.listDailyGoal);
-        lwToDo.setAdapter(gaToDo);
-
-        final GoalsAdapter gaDone=new GoalsAdapter(date,cla,listDone,listToDo,getContext(),R.id.listDailyGoalArchived);
-        lwDone.setAdapter(gaDone);
 
         ImageButton dailyButton=(ImageButton)view.findViewById(R.id.imageDailyButton);
         dailyButton.setOnClickListener(new View.OnClickListener() {
@@ -118,41 +138,118 @@ public class OneDayFragment extends AbstractFragment {
         addGoal.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("ITEMS","onclick");
-                ListView lwToDo=null;
+                RecyclerView lwToDo=null;
                 View view=v;
                 while(lwToDo==null){
-                    lwToDo=(ListView)view.findViewById(R.id.listDailyGoal);
+                    lwToDo=(RecyclerView)view.findViewById(R.id.listDailyGoal);
                     view=(View)view.getParent();
                 }
                 Log.d("ITEMS",lwToDo.getClass().getName());
 
-                int n=lwToDo.getCount();
+                int n=lwToDo.getChildCount();
                 Log.d("ITEMS",n+"");
                 for(int i=0;i<n;i++){
-                    TextCheckViewHolder item = (TextCheckViewHolder)lwToDo.getChildAt(i).getTag();
-                    String goal = item.getTextView().getText().toString();
+                    EditText ev=(EditText)lwToDo.getChildAt(i).findViewById(R.id.txtNameGoal);
+
+                    int id=ev.getTag()==null?0:(Integer)ev.getTag();
+                    String goal = ev.getText().toString();
                     if(goal==null || goal.trim().equals("")) continue ;
-                    String msg=item.getId()==0?"inserted":"updated";
-                    if(Goals.insertDailyGoal(db, item.getId(),goal,sdfDB.format(date),item.getCheckBox().isChecked())){
+                    String msg=id==0?"inserted":"updated";
+                    if(Goals.insertDailyGoal(db, id,goal,sdfDB.format(date),false)){
                         Toast.makeText(lwToDo.getContext(),"Succesfully "+msg+" goal",Toast.LENGTH_SHORT).show();
-                    }
+                }
 
                 }
                 calculateData(db,listToDo,listDone);
-                refreshView(gaToDo,R.id.listDailyGoal);
+//                refreshView(gaToDo,R.id.listDailyGoal);
             }
         });
 
+        ChangeListAdapter cla=new ChangeListAdapter(this);
 
+//        final GoalsAdapter gaToDo=new GoalsAdapter(date,cla,listToDo,listDone,getContext(),R.id.listDailyGoal);
+        final CustomAdapter gaToDo=new CustomAdapter(listToDo);
+        lwToDo.setAdapter(gaToDo);
 
+        final GoalsAdapter gaDone=new GoalsAdapter(date,cla,listDone,listToDo,getContext(),R.id.listDailyGoalArchived);
+        lwDone.setAdapter(gaDone);
 
-
-       if(listDone.isEmpty()) collapseArchived(null,view);
-        else expandArchived(null,view);
-
-        viewLists();
+        setSwipeForRecyclerView(lwToDo);
 
         return view;
+    }
+
+    private void setSwipeForRecyclerView(final RecyclerView mRecyclerView) {
+
+        SwipeUtil swipeHelper = new SwipeUtil(0, ItemTouchHelper.LEFT, getActivity()) {
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int swipedPosition = viewHolder.getAdapterPosition();
+                CustomAdapter adapter = (CustomAdapter) mRecyclerView.getAdapter();
+                adapter.pendingRemoval(swipedPosition);
+            }
+
+            @Override
+            public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int position = viewHolder.getAdapterPosition();
+                CustomAdapter adapter = (CustomAdapter) mRecyclerView.getAdapter();
+                if (adapter.isPendingRemoval(position)) {
+                    return 0;
+                }
+                return super.getSwipeDirs(recyclerView, viewHolder);
+            }
+        };
+
+        ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(swipeHelper);
+        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+
+        //set swipe label
+        swipeHelper.setLeftSwipeLable("Archive");
+        //set swipe background-Color
+        swipeHelper.setLeftcolorCode(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+
+    }
+
+    private AlertDialog AskOption(final DBHandler db, final RecyclerView.ViewHolder model)
+    {
+        AlertDialog myQuittingDialogBox =new AlertDialog.Builder(this.getContext())
+                //set message, title, and icon
+                .setTitle("Delete")
+                .setMessage("Do you want to Delete")
+                .setIcon(R.drawable.ic_delete_black_24dp)
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        if(Goals.delete(db,model.getId())) {
+//
+//                            dataSet1.remove(model);
+//                            dataset1.add(new TextCheckDataModel(0,"",false));
+//
+//                            if (ca != null) {
+//
+//                                ca.refresh();
+//                            }
+//                        }
+                    }
+
+                })
+
+
+
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
+
+    }
+
+    private Context getApplicationContext() {
+        return this.getContext();
     }
 
     private void calculateData(DBHandler db,List<TextCheckDataModel> listToDo, List<TextCheckDataModel> listDone) {
@@ -195,18 +292,18 @@ public class OneDayFragment extends AbstractFragment {
 
     public void viewLists(){
         boolean oggi=isToday(dateThis);
-        ListView listView = (ListView)viewFather.findViewById(R.id.listDailyGoal);
+        RecyclerView listView = (RecyclerView)viewFather.findViewById(R.id.listDailyGoal);
         ListView listViewArch = (ListView)viewFather.findViewById(R.id.listDailyGoalArchived);
         TextView ntd = (TextView)viewFather.findViewById(R.id.textView3);
         if(!oggi){
-            if(listView.getCount()==0) collapseTodo(null,viewFather);
+            if(listView.getAdapter().getItemCount()==0) collapseTodo(null,viewFather);
             else expandTodo(null,viewFather);
         }
         else{
             if(listViewArch.getCount()==0) collapseArchived(null,viewFather);
             else expandArchived(null,viewFather);
         }
-        ntd.setVisibility(listView.getCount()+listViewArch.getCount()==0?View.VISIBLE:View.GONE);
+        ntd.setVisibility(listView.getAdapter().getItemCount()+listViewArch.getCount()==0?View.VISIBLE:View.GONE);
     }
 
     private boolean isToday(Date dateApp){
